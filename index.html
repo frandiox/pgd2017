@@ -4,13 +4,18 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+		<title>Onsen UI - PhoneGap Day 2017</title>
 
 		<link rel="stylesheet" href="css/reveal.css">
 		<link rel="stylesheet" href="css/theme/black.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/1.0.0-rc.11/webcomponents-lite.js"></script>
 
 		<!-- Theme used for syntax highlighting of code -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Custom CSS and components -->
+		<link rel="stylesheet" href="css/style.css">
+    <link rel="import" href="favorite-star.html">
 
 		<!-- Printing and PDF exports -->
 		<script>
@@ -24,8 +29,347 @@
 	<body>
 		<div class="reveal">
 			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
+        <!-- INTRO -->
+        <section data-markdown>
+          <textarea data-template>
+            #### PhoneGap Day 2017
+            ## Web Components: creating reusable user interface
+
+            Speaker: <img src="./assets/japan-flag.png" class="reset-img" style="width: 40px"> __Masa Tanaka__
+
+            Projects: <img src="./assets/monaca-logo.png" class="reset-img" style="width: 30px"> __Monaca__ & <img src="./assets/onsenui-logo.png" class="reset-img" style="width: 30px"> __Onsen UI__
+          </textarea>
+        </section>
+        <!-- Web Components -->
+        <section>
+          <section data-markdown>
+            <textarea data-template>
+              ## Web Components <img src="./assets/web-components-logo.svg" class="reset-img" style="width: 100px">
+              _The building blocks of the future web_
+
+              * HTML Templates: reusable DOM loadable on demand <!-- .element: class="fragment fade-up" -->
+              <li>Custom Elements: literally custom HTML elements beyond _div_ and _span_</li> <!-- .element: class="fragment fade-up" -->
+              * Shadow DOM: CSS and DOM encapsulation in a component <!-- .element: class="fragment fade-up" -->
+              * HTML Imports: packaging mechanism that prevents inlining components <!-- .element: class="fragment fade-up" -->
+            </textarea>
+          </section>
+          <!-- Simple and Powerful API -->
+          <section>
+            <h3>Simple yet Powerful API (v1)</h3>
+
+            Favorite Star <favorite-star></favorite-star>
+
+            <div data-markdown>
+              <textarea data-template>
+                ```
+                  <link rel="import" href="favorite-star.html">
+                ```
+
+                ```
+                  <!-- favorite-star.html -->
+
+                  <template>
+                    <style>
+                      span[active] {
+                        color: #ffac33;
+                        animation: favorite-star-bounce 0.3s ease-in-out;
+                      }
+                      span:hover:not([active]) {
+                        color: #f5c682;
+                      }
+
+                      /* Extra style omitted */
+                    </style>
+
+                    <span>&#x2605;</span>
+                  </template>
+
+                  <script>
+                  // Get current document
+                  const thisDoc = document.currentScript.ownerDocument;
+
+                  class FavoriteStar extends HTMLElement {
+                    constructor() {
+                      super();
+
+                      // Get and clone the <template>
+                      const template = thisDoc.querySelector('template');
+                      const clone = document.importNode(template.content, true);
+
+                      // Create shadow DOM
+                      const shadowRoot = this.attachShadow({mode: 'open'});
+                      shadowRoot.appendChild(clone);
+
+                      // Save a reference to the star element
+                      this.starElement = shadowRoot.querySelector('span');
+                      this.boundOnClick = this.toggle.bind(this);
+                    }
+
+                    connectedCallback() {
+                      this.addEventListener('click', this.boundOnClick);
+                    }
+
+                    disconnectedCallback() {
+                      this.removeEventListener('click', this.boundOnClick);
+                    }
+
+                    static get observedAttributes() {
+                      return ['active'];
+                    }
+
+                    attributeChangedCallback(attr, oldValue, newValue) {
+                      if (attr === 'active') {
+                        // Update the star element
+                        console.log('toggle!')
+                        this.toggle.call(this.starElement);
+                      }
+                    }
+
+                    toggle() {
+                      if (this.hasAttribute('active')) {
+                        this.removeAttribute('active');
+                      } else {
+                        this.setAttribute('active', '');
+                      }
+                    }
+                  }
+
+                  window.customElements.define('favorite-star', FavoriteStar);
+                  </script>
+                ```
+              </textarea>
+            </div>
+          </section>
+          <!-- Pros/Cons -->
+          <section>
+            <div class="columns">
+              <div data-markdown>
+                <textarea data-template>
+                  ## Pros
+
+                  * Simplicity <!-- .element: class="fragment fade-up" data-fragment-index="1" -->
+                  * Browser native support <!-- .element: class="fragment fade-up" data-fragment-index="3" -->
+                </textarea>
+              </div>
+              <div data-markdown>
+                <textarea data-template>
+                  ## Cons
+
+                  * HTML attributes are only strings <!-- .element: class="fragment fade-up" data-fragment-index="2" -->
+                  * Under development (soon™) <!-- .element: class="fragment fade-up" data-fragment-index="4" -->
+                </textarea>
+              </div>
+            </div>
+            <div class="fragment" data-fragment-index="5">
+              <table class="wc-table">
+                <thead>
+                  <tr>
+                    <th rowspan="2"></th>
+                  </tr>
+                  <tr>
+                    <th>Polyfill</th>
+                    <th>Chrome/Opera</th>
+                    <th>Firefox</th>
+                    <th>Safari</th>
+                    <th>Edge</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th>Templates</th>
+                    <td class="wc-yes"></td>
+                    <td class="wc-yes">Stable</td>
+                    <td class="wc-yes">Stable</td>
+                    <td class="wc-yes">8</td>
+                    <td class="wc-yes">13</td>
+                  </tr>
+                  <tr>
+                    <th>HTML Imports</th>
+                    <td class="wc-yes"></td>
+                    <td class="wc-yes">Stable</td>
+                    <td class="wc-kinda">On Hold</td>
+                    <td class="wc-vote">
+                      No Active Development
+                    </td>
+                    <td class="wc-vote">Deciding</td>
+                  </tr>
+                  <tr>
+                    <th>Custom Elements</th>
+                    <td class="wc-yes"></td>
+                    <td class="wc-yes">Stable</td>
+                    <td class="wc-yes">Flag</td>
+                    <td class="wc-yes">
+                      10.1
+                    </td>
+                    <td class="wc-vote">Deciding</td>
+                  </tr>
+                  <tr>
+                    <th>Shadow DOM</th>
+                    <td class="wc-yes"></td>
+                    <td class="wc-yes">Stable</td>
+                    <td class="wc-kinda">Bug</td>
+                    <td class="wc-yes">10</td>
+                    <td class="wc-vote">Deciding</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <!-- More than Polymer -->
+          <section>
+              <h3><img src="./assets/web-components-logo.svg" class="reset-img" style="width: 100px"> !== <img src="./assets/polymer-logo.png" class="reset-img" style="width: 90px"></h3>
+              <div data-markdown>
+                <textarea data-template>
+                  ###  Web Components > Polymer
+
+                  Polymer Project is just a library built on top of Web Components that adds extra features. There are more:
+                </textarea>
+              </div>
+
+              <div class="columns">
+                <div data-markdown>
+                  <textarea data-template>
+                    * Skate.js
+                    * X-Tag
+                  </textarea>
+                </div>
+                <div data-markdown>
+                  <textarea data-template>
+                    * Slim.js
+                    * Onsen UI <!-- .element: class="fragment grow highlight-red" -->
+                  </textarea>
+                </div>
+              </div>
+          </section>
+        </section>
+        <!-- Onsen UI -->
+        <section>
+          <section data-markdown>
+            <textarea data-template>
+              <img src="./assets/onsenui-logo-2.png" class="reset-img" style="width: 600px">
+
+              UI library to create hybrid apps with PhoneGap. Features:
+
+              * Super Simple API <!-- .element: class="fragment fade-up" --> - _Web Components_ ❤
+              * Framework Agnostic <!-- .element: class="fragment fade-up" --> - _Web Components_ 💕
+              * Future Proof <!-- .element: class="fragment fade-up" --> - _Web Components_ 💘
+
+            </textarea>
+          </section>
+          <section data-markdown>
+            <textarea data-template>
+              ## UI Components
+
+              <!-- <iframe src="https://onsenui.github.io/showcase-carousel" class="showcase-carousel fragment fade"></iframe> -->
+              <img src="./assets/carousel-ios.png" class="reset-img showcase-carousel"><img src="./assets/carousel-android.png" class="reset-img showcase-carousel">
+
+              ```
+              <ons-input type="search"></ons-input>
+              ```
+              <!-- .element: class="fragment fade-up" -->
+              ```
+              <ons-switch checked></ons-switch>
+              ```
+              <!-- .element: class="fragment fade-up" -->
+              ```
+              <ons-toast>Hi there! <button>Dismiss</button></ons-toast>
+              ```
+              <!-- .element: class="fragment fade-up" -->
+            </textarea>
+          </section>
+          <!-- Demo -->
+          <section data-background-color="#CCC">
+            <div class="columns">
+              <div>
+                <iframe src="./vue-onsenui-kitchensink/?platform=ios" scrolling="no" class="iframe-sample"></iframe>
+              </div>
+              <div>
+                <iframe src="./vue-onsenui-kitchensink/?platform=android#zoom=100" scrolling="no" class="iframe-sample"></iframe>
+              </div>
+            </div>
+          </section>
+          <!-- Bindings -->
+          <section>
+            <h5>Tailored API</h5>
+            <div class="columns">
+              <div data-markdown class="api-sample-column">
+                <textarea data-template>
+                  ###### <img src="./assets/js-logo.svg" class="reset-img" style="width: 50px"> JavaScript
+
+                  ```html
+                  <ons-dialog id="myDialog" cancelable>
+                    Content
+                  </ons-dialog>
+                  ```
+                  ```javascript
+                  document.getElementById('myDialog').show();
+                  ```
+                </textarea>
+              </div>
+              <div data-markdown class="api-sample-column">
+                <textarea data-template>
+                  ###### <img src="./assets/angular1-logo.svg" class="reset-img" style="width: 50px"> AngularJS
+
+                  ```html
+                  <ons-dialog var="myDialog" cancelable>
+                    Content
+                  </ons-dialog>
+                  ```
+                  ```javascript
+                  $scope.myDialog.show();
+                  ```
+                </textarea>
+              </div>
+            </div>
+            <div class="columns">
+              <div data-markdown class="api-sample-column">
+                <textarea data-template>
+                  ###### <img src="./assets/react-logo.svg" class="reset-img" style="width: 50px"> React
+
+                  ```html
+                  <Ons.Dialog isCancelable={true}
+                    onCancel={() => this.setState({dialogOpen: false})}
+                    isOpen={this.state.dialogOpen}
+                  >
+                    Content
+                  </Ons.Dialog>
+                  ```
+                  ```javascript
+                  this.setState({dialogOpen: true});
+                  ```
+                </textarea>
+              </div>
+              <div data-markdown class="api-sample-column">
+                <textarea data-template>
+                  ###### <img src="./assets/vue-logo.svg" class="reset-img" style="width: 50px"> Vue
+
+                  ```html
+                  <v-ons-dialog cancelable
+                    :visible.sync="dialogVisible"
+                  >
+                    Content
+                  </v-ons-dialog>
+                  ```
+                  ```javascript
+                  this.dialogVisible = true;
+                  ```
+                </textarea>
+              </div>
+            </div>
+          </section>
+        </section>
+        <!-- Monaca -->
+        <section data-markdown>
+          <textarea data-template>
+            ## Monaca
+          </textarea>
+        </section>
+        <!-- Questions -->
+        <section data-markdown>
+          <textarea data-template>
+            # Questions?
+          </textarea>
+        </section>
 			</div>
 		</div>
 

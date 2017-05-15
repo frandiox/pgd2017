@@ -1,0 +1,3 @@
+[submodule "vue-onsenui-kitchensink"]
+	path = vue-onsenui-kitchensink
+	url = https://github.com/frandiox/vue-onsenui-kitchensink.git
